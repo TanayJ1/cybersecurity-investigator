@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SecurityEvent {
+  id          String   @id @default(cuid())
+  timestamp   DateTime
+  sourceIp    String
+  destination String?
+  method      String?
+  statusCode  Int?
+  username    String?
+  eventType   String?
+  message     String?
+  severity    String   @default("LOW")
+  createdAt   DateTime @default(now())
+
+  @@index([sourceIp])
+  @@index([timestamp])
+  @@index([eventType])
+}
+
+model ThreatFinding {
+  id          String   @id @default(cuid())
+  fingerprint String   @unique
+  title       String
+  category    String
+  description String
+  sourceIp    String
+  severity    String
+  eventCount  Int
+  firstSeen   DateTime
+  lastSeen    DateTime
+  evidenceIds String[] @default([])
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sourceIp])
+  @@index([severity])
+  @@index([status])
+  @@index([category])
+}
+
+model InvestigationReport {
+  id              String   @id @default(cuid())
+  findingId       String
+  summary         String
+  analysis        String
+  recommendations String
+  toolTrace       Json
+  createdAt       DateTime @default(now())
+
+  @@index([findingId])
+  @@index([createdAt])
+}
+
+model ThreatIntelDocument {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  category    String
+  description String
+  source      String
+  techniqueId String?
+  embedding   Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([techniqueId])
+}
+
+model CorrelatedIncident {
+  id          String   @id @default(cuid())
+  fingerprint String   @unique
+  title       String
+  sourceIp    String
+  severity    String
+  startTime   DateTime
+  endTime     DateTime
+  eventCount  Int
+  findingIds  String[] @default([])
+  eventIds    String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sourceIp])
+  @@index([severity])
+  @@index([startTime])
+}
+
+model AIIncidentReport {
+  id               String   @id @default(cuid())
+  incidentId       String
+  title            String
+  report           String
+  intelReferences  Json
+  createdAt        DateTime @default(now())
+
+  @@index([incidentId])
+  @@index([createdAt])
+}
